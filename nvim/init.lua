@@ -1,1 +1,2 @@
-require("bytze")
+require("bytze.core")
+require("bytze.lazy")

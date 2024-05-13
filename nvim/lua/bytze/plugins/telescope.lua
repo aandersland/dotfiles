@@ -1,25 +1,50 @@
-require('telescope').setup({})
+return {
+	"nvim-telescope/telescope.nvim",
+	branch = "0.1.x",
+	dependencies = {
+		"nvim-lua/plenary.nvim",
+		{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+		"nvim-tree/nvim-web-devicons",
+		"folke/todo-comments.nvim",
+	},
+	config = function()
+		local telescope = require("telescope")
+		local actions = require("telescope.actions")
+		local transform_mod = require("telescope.actions.mt").transform_mod
 
-pcall(require('telescope').load_extension, 'fzf')
+		local trouble = require("trouble")
+		local trouble_telescope = require("trouble.providers.telescope")
 
-vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
-vim.keymap.set('n', '<leader>/', function()
-  -- You can pass additional configuration to telescope to change theme, layout, etc.
-  require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-    winblend = 10,
-    previewer = false,
-  })
-end, { desc = '[/] Fuzzily search in current buffer]' })
+		-- or create your custom action
+		local custom_actions = transform_mod({
+			open_trouble_qflist = function(prompt_bufnr)
+				trouble.toggle("quickfix")
+			end,
+		})
 
-vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
-vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
-vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
-vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
-vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
-vim.keymap.set('n', '<leader>sb', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
-vim.keymap.set('n', '<leader>sS', require('telescope.builtin').git_status, { desc = '' })
-vim.keymap.set('n', '<leader>sm', ":Telescope harpoon marks<CR>", { desc = 'Harpoon [M]arks' })
-vim.keymap.set("n", "<Leader>sr", "<CMD>lua require('telescope').extensions.git_worktree.git_worktrees()<CR>", silent)
-vim.keymap.set("n", "<Leader>sR", "<CMD>lua require('telescope').extensions.git_worktree.create_git_worktree()<CR>", silent)
-vim.keymap.set("n", "<Leader>sn", "<CMD>lua require('telescope').extensions.notify.notify()<CR>", silent)
+		telescope.setup({
+			defaults = {
+				path_display = { "smart" },
+				mappings = {
+					i = {
+						["<C-k>"] = actions.move_selection_previous, -- move to prev result
+						["<C-j>"] = actions.move_selection_next, -- move to next result
+						["<C-q>"] = actions.send_selected_to_qflist + custom_actions.open_trouble_qflist,
+						["<C-t>"] = trouble_telescope.smart_open_with_trouble,
+					},
+				},
+			},
+		})
 
+		telescope.load_extension("fzf")
+
+		-- set keymaps
+		local keymap = vim.keymap -- for conciseness
+
+		keymap.set("n", "<leader>sf", "<cmd>Telescope find_files<cr>", { desc = "Fuzzy find files in cwd" })
+		keymap.set("n", "<leader>sr", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
+		keymap.set("n", "<leader>ss", "<cmd>Telescope live_grep<cr>", { desc = "Find string in cwd" })
+		keymap.set("n", "<leader>sc", "<cmd>Telescope grep_string<cr>", { desc = "Find string under cursor in cwd" })
+		keymap.set("n", "<leader>st", "<cmd>TodoTelescope<cr>", { desc = "Find todos" })
+	end,
+}

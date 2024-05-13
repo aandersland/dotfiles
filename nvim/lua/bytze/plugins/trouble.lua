@@ -1,31 +1,12 @@
-vim.keymap.set("n", "<leader>xx", "<cmd>TroubleToggle<cr>",
-  {silent = true, noremap = true}
-)
-vim.keymap.set("n", "<leader>xw", "<cmd>TroubleToggle workspace_diagnostics<cr>",
-  {silent = true, noremap = true}
-)
-vim.keymap.set("n", "<leader>xd", "<cmd>TroubleToggle document_diagnostics<cr>",
-  {silent = true, noremap = true}
-)
-vim.keymap.set("n", "<leader>xl", "<cmd>TroubleToggle loclist<cr>",
-  {silent = true, noremap = true}
-)
-vim.keymap.set("n", "<leader>xq", "<cmd>TroubleToggle quickfix<cr>",
-  {silent = true, noremap = true}
-)
-vim.keymap.set("n", "gR", "<cmd>TroubleToggle lsp_references<cr>",
-  {silent = true, noremap = true}
-)
-
--- Diagnostic signs
--- https://github.com/folke/trouble.nvim/issues/52
-local signs = {
-    Error = " ",
-    Warning = " ",
-    Hint = " ",
-    Information = " "
+return {
+	"folke/trouble.nvim",
+	dependencies = { "nvim-tree/nvim-web-devicons", "folke/todo-comments.nvim" },
+	keys = {
+		{ "<leader>tx", "<cmd>TroubleToggle<CR>", desc = "Open/close list" },
+		{ "<leader>tw", "<cmd>TroubleToggle workspace_diagnostics<CR>", desc = "workspace diagnostics" },
+		{ "<leader>td", "<cmd>TroubleToggle document_diagnostics<CR>", desc = "document diagnostics" },
+		{ "<leader>tq", "<cmd>TroubleToggle quickfix<CR>", desc = "quickfix list" },
+		{ "<leader>tl", "<cmd>TroubleToggle loclist<CR>", desc = "location list" },
+		{ "<leader>tt", "<cmd>TodoTrouble<CR>", desc = "todos list" },
+	},
 }
-for type, icon in pairs(signs) do
-    local hl = "DiagnosticSign" .. type
-    vim.fn.sign_define(hl, {text = icon, texthl = hl, numhl = hl})
-end
